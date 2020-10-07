@@ -5736,9 +5736,10 @@ int qcow2_get_cluster_info(BlockDriverState *bs, uint64_t offset)
 {
     BDRVQcow2State *s = bs->opaque;
     uint64_t host_offset;
+    uint64_t coffset;
     unsigned int bytes;
     QCow2SubclusterType type;
-    int ret = 0;
+    int ret = 0, csize, nb_csectors;
 
     /* only get information for one byte */
     bytes = 1;
@@ -5752,6 +5753,17 @@ int qcow2_get_cluster_info(BlockDriverState *bs, uint64_t offset)
     printf("cluster offset host: %ld\n", host_offset);
     printf("cluster offset guest: %ld\n", offset);
     printf("cluster offset in-cluster: %ld\n", offset_into_cluster(s, offset));
+
+    if (type == QCOW2_SUBCLUSTER_COMPRESSED) {
+        coffset = host_offset & s->cluster_offset_mask;
+        nb_csectors = ((host_offset >> s->csize_shift) & s->csize_mask) + 1;
+        csize = nb_csectors * QCOW2_COMPRESSED_SECTOR_SIZE -
+            (coffset & ~QCOW2_COMPRESSED_SECTOR_MASK);
+
+        printf("cluster compressed offset: %ld\n", coffset);
+        printf("cluster compressed sectors: %d\n", nb_csectors);
+        printf("cluster compressed size: %d\n", csize);
+    }
 
     return ret;
 }
