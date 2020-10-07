@@ -5731,6 +5731,32 @@ void qcow2_signal_corruption(BlockDriverState *bs, bool fatal, int64_t offset,
     s->signaled_corruption = true;
 }
 
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+int qcow2_get_cluster_info(BlockDriverState *bs, uint64_t offset)
+{
+    BDRVQcow2State *s = bs->opaque;
+    uint64_t host_offset;
+    unsigned int bytes;
+    QCow2SubclusterType type;
+    int ret = 0;
+
+    /* only get information for one byte */
+    bytes = 1;
+
+    ret = qcow2_get_host_offset(bs, offset, &bytes, &host_offset, &type);
+    if (ret < 0) {
+        return ret;
+    }
+
+    printf("cluster type: %s\n", qcow2_get_subcluster_name(type));
+    printf("cluster offset host: %ld\n", host_offset);
+    printf("cluster offset guest: %ld\n", offset);
+    printf("cluster offset in-cluster: %ld\n", offset_into_cluster(s, offset));
+
+    return ret;
+}
+#endif
+
 #define QCOW_COMMON_OPTIONS                                         \
     {                                                               \
         .name = BLOCK_OPT_SIZE,                                     \
@@ -5914,6 +5940,10 @@ BlockDriver bdrv_qcow2 = {
     .bdrv_co_can_store_new_dirty_bitmap = qcow2_co_can_store_new_dirty_bitmap,
     .bdrv_co_remove_persistent_dirty_bitmap =
             qcow2_co_remove_persistent_dirty_bitmap,
+
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+    .bdrv_get_cluster_info = qcow2_get_cluster_info,
+#endif
 };
 
 static void bdrv_qcow2_init(void)

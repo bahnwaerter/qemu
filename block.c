@@ -5552,6 +5552,23 @@ BlockStatsSpecific *bdrv_get_specific_stats(BlockDriverState *bs)
     return drv->bdrv_get_specific_stats(bs);
 }
 
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+int bdrv_get_cluster_info(BlockDriverState *bs, uint64_t offset)
+{
+    BlockDriver *drv = bs->drv;
+
+    if (!drv) {
+        return -ENOMEDIUM;
+    }
+
+    if (drv->bdrv_get_cluster_info) {
+        return drv->bdrv_get_cluster_info(bs, offset);
+    }
+
+    return -ENOTSUP;
+}
+#endif
+
 void bdrv_debug_event(BlockDriverState *bs, BlkdebugEvent event)
 {
     if (!bs || !bs->drv || !bs->drv->bdrv_debug_event) {

@@ -789,6 +789,24 @@ QCow2SubclusterType qcow2_get_subcluster_type(BlockDriverState *bs,
     }
 }
 
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+static inline const char *qcow2_get_subcluster_name(
+    const QCow2SubclusterType type)
+{
+    static const char *subcluster_names[] = {
+        "QCOW2_SUBCLUSTER_UNALLOCATED_PLAIN",
+        "QCOW2_SUBCLUSTER_UNALLOCATED_ALLOC",
+        "QCOW2_SUBCLUSTER_ZERO_PLAIN",
+        "QCOW2_SUBCLUSTER_ZERO_ALLOC",
+        "QCOW2_SUBCLUSTER_NORMAL",
+        "QCOW2_SUBCLUSTER_COMPRESSED",
+        "QCOW2_SUBCLUSTER_INVALID"
+    };
+
+    return subcluster_names[type];
+}
+#endif
+
 static inline bool qcow2_cluster_is_allocated(QCow2ClusterType type)
 {
     return (type == QCOW2_CLUSTER_COMPRESSED || type == QCOW2_CLUSTER_NORMAL ||
@@ -835,6 +853,10 @@ int qcow2_update_header(BlockDriverState *bs);
 void qcow2_signal_corruption(BlockDriverState *bs, bool fatal, int64_t offset,
                              int64_t size, const char *message_format, ...)
                              GCC_FMT_ATTR(5, 6);
+
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+int qcow2_get_cluster_info(BlockDriverState *bs, uint64_t offset);
+#endif
 
 int qcow2_validate_table(BlockDriverState *bs, uint64_t offset,
                          uint64_t entries, size_t entry_len,

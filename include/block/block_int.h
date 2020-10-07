@@ -344,6 +344,14 @@ struct BlockDriver {
         bool want_zero, int64_t offset, int64_t bytes, int64_t *pnum,
         int64_t *map, BlockDriverState **file);
 
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+    /*
+     * Returns information about the mapping between the guest cluster
+     * and the host cluster for a specific guest block address.
+     */
+    int (*bdrv_get_cluster_info)(BlockDriverState *bs, uint64_t offset);
+#endif
+
     /*
      * Invalidate any cached meta-data.
      */

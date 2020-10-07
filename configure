@@ -293,6 +293,7 @@ unset target_list_exclude
 # Distributions want to ensure that several features are compiled in, and it
 # is impossible without a --enable-foo that exits if a feature is not found.
 
+block_drv_debug_cluster="no"
 brlapi=""
 curl=""
 curses=""
@@ -1036,6 +1037,9 @@ for opt do
       strip_opt="no"
       fortify_source="no"
   ;;
+  --enable-block-cluster-info)
+      block_drv_debug_cluster="yes"
+  ;;
   --enable-sanitizers) sanitizers="yes"
   ;;
   --disable-sanitizers) sanitizers="no"
@@ -1687,6 +1691,7 @@ Advanced options (experts only):
   --with-suffix=SUFFIX     suffix for QEMU data inside datadir/libdir/sysconfdir/docdir [$qemu_suffix]
   --with-pkgversion=VERS   use specified string as sub-version of the package
   --enable-debug           enable common debug build options
+  --enable-block-cluster-info enable block cluster info support
   --enable-sanitizers      enable default sanitizers
   --enable-tsan            enable thread sanitizer
   --disable-strip          disable stripping binaries
@@ -6210,6 +6215,9 @@ if test "$audio_win_int" = "yes" ; then
 fi
 echo "CONFIG_BDRV_RW_WHITELIST=$block_drv_rw_whitelist" >> $config_host_mak
 echo "CONFIG_BDRV_RO_WHITELIST=$block_drv_ro_whitelist" >> $config_host_mak
+if test "$block_drv_debug_cluster" = "yes" ; then
+  echo "CONFIG_BDRV_DEBUG_CLUSTER=y" >> $config_host_mak
+fi
 if test "$xfs" = "yes" ; then
   echo "CONFIG_XFS=y" >> $config_host_mak
 fi

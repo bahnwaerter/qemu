@@ -555,6 +555,9 @@ int bdrv_get_info(BlockDriverState *bs, BlockDriverInfo *bdi);
 ImageInfoSpecific *bdrv_get_specific_info(BlockDriverState *bs,
                                           Error **errp);
 BlockStatsSpecific *bdrv_get_specific_stats(BlockDriverState *bs);
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+int bdrv_get_cluster_info(BlockDriverState *bs, uint64_t offset);
+#endif
 void bdrv_round_to_clusters(BlockDriverState *bs,
                             int64_t offset, int64_t bytes,
                             int64_t *cluster_offset,

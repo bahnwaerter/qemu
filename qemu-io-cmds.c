@@ -2381,6 +2381,34 @@ static const cmdinfo_t sleep_cmd = {
        .oneline        = "waits for the given value in milliseconds",
 };
 
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+static int cluster_info_f(BlockBackend *blk, int argc, char **argv)
+{
+    BlockDriverState *bs = blk_bs(blk);
+    char *endptr;
+    long offset;
+
+    offset = strtol(argv[1], &endptr, 0);
+    if (offset < 0 || *endptr != '\0' ||
+        offset > (bs->total_sectors * BDRV_SECTOR_SIZE)) {
+        printf("%s is not a valid number\n", argv[1]);
+        return -EINVAL;
+    }
+
+    return bdrv_get_cluster_info(bs, offset);
+}
+
+static const cmdinfo_t cluster_info_cmd = {
+       .name           = "cluster_info",
+       .argmin         = 1,
+       .argmax         = 1,
+       .cfunc          = cluster_info_f,
+       .args           = "offset",
+       .oneline        = "returns information about the mapping between guest \
+                          and host cluster type for a specific guest address",
+};
+#endif
+
 static void help_oneline(const char *cmd, const cmdinfo_t *ct)
 {
     printf("%s ", cmd);
@@ -2493,5 +2521,8 @@ static void __attribute((constructor)) init_qemuio_commands(void)
     qemuio_add_command(&wait_break_cmd);
     qemuio_add_command(&abort_cmd);
     qemuio_add_command(&sleep_cmd);
+#ifdef CONFIG_BDRV_DEBUG_CLUSTER
+    qemuio_add_command(&cluster_info_cmd);
+#endif
     qemuio_add_command(&sigraise_cmd);
 }
